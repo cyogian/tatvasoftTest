@@ -1,23 +1,36 @@
-import logo from './logo.svg';
 import './App.css';
-
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { DataGrid } from '@mui/x-data-grid';
 function App() {
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchField, setSearchField] = useState("");
+  const onSearchChange = e => {
+    setSearchField(e.target.value)
+  }
+  useEffect(() => {
+    axios.get("https://randomuser.me/api/?results=5000")
+      .then(res => {
+        console.log(res.data)
+        setData(res.data.results)
+      })
+  }, [])
+  useEffect(() => {
+    const searchString = searchField.trim()
+    if (searchString.length === 0) return [...data]
+    let fData = data.filter(user => {
+      const name = user.name.first + " " + user.name.last
+      const email = user.email
+      return name.includes(searchString) || email.includes(searchString)
+    })
+    console.log(fData)
+  }, [data, searchField])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <input onChange={onSearchChange} value={searchField} />
+
     </div>
   );
 }
